@@ -26,7 +26,7 @@
 ;; (defconst wybe-flags '("public" "private")
 ;;   "Function flags.")
 
-(defconst wybe-types '("int" "float" "string" "char")
+(defconst wybe-types '("int" "float" "string" "char" "bool")
   "Wybe primitive types.")
 
 ;; generate regex string for each category of keywords
@@ -37,17 +37,21 @@
 ;; (defconst wybe-flags-re '(regexp-opt wybe-flags 'words)
 ;;   "Regex for matching function flags.")
 (defconst wybe-func-re
-  (rx symbol-start "func" (1+ space) (group (1+ (or word ?_))))
+  (rx symbol-start (or "proc" "func" "type") (1+ space)
+      (group (1+ (any alnum ?+ ?- ?*)))
+      (any space ?\())
   "Regex for matching function and proc names.")
 (defconst wybe-comment-re
-  (rx (0+ space) (char ?#) (0+ (any " " word)))
+  (rx (0+ space) (char ?#) (0+ anything) eol)
   "Regex for matching comments.")
+
+
 
 ;; create the list for font-lock.
 ;; each category of keyword is given a particular face
 (defvar wybe-font-lock-keywords
-  `((,wybe-keywords-re . font-lock-keyword-face)
-    (,wybe-comment-re . font-lock-comment-face)
+  `((,wybe-comment-re . font-lock-comment-face)
+    (,wybe-keywords-re . font-lock-keyword-face)    
     (,wybe-types-re . font-lock-type-face)
     (,wybe-func-re . (1 font-lock-function-name-face)))
   "Wybe language font-locks.")
