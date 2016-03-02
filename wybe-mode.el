@@ -20,7 +20,7 @@
 ;; define several category of keywords
 (defconst wybe-keywords
   '("func" "if" "then" "else" "proc" "end" "public" "private" "use"
-    "type")
+    "type", "do", "until", "unless", "or")
   "Keywords of the language.")
 
 ;; (defconst wybe-flags '("public" "private")
