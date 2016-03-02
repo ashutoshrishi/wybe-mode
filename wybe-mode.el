@@ -45,7 +45,10 @@
   (rx (0+ space) (char ?#) (0+ anything) eol)
   "Regex for matching comments.")
 
-
+(defconst wybe-custom-types-re
+  (rx (char ?:) (0+ space)
+      (group (1+ (any alnum))))
+  "Regex for custom type annotations.")
 
 ;; create the list for font-lock.
 ;; each category of keyword is given a particular face
@@ -53,7 +56,8 @@
   `((,wybe-comment-re . font-lock-comment-face)
     (,wybe-keywords-re . font-lock-keyword-face)    
     (,wybe-types-re . font-lock-type-face)
-    (,wybe-func-re . (1 font-lock-function-name-face)))
+    (,wybe-func-re . (1 font-lock-function-name-face))
+    (,wybe-custom-types-re . (1 font-lock-type-face)))
   "Wybe language font-locks.")
 
 ;;;###autoload
