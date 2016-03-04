@@ -41,6 +41,7 @@
       (group (1+ (any alnum ?+ ?- ?*)))
       (any space ?\())
   "Regex for matching function and proc names.")
+
 (defconst wybe-comment-re
   (rx (0+ anything) (group (char ?#) (0+ anything)) eol)
   "Wybe comment regex.")
@@ -53,12 +54,23 @@
 ;; create the list for font-lock.
 ;; each category of keyword is given a particular face
 (defvar wybe-font-lock-keywords
-  `((,wybe-comment-re . (1 font-lock-comment-face))
-    (,wybe-keywords-re . font-lock-keyword-face)    
+  `((,wybe-keywords-re . font-lock-keyword-face)
     (,wybe-types-re . font-lock-type-face)
     (,wybe-func-re . (1 font-lock-function-name-face))
     (,wybe-custom-types-re . (1 font-lock-type-face)))
   "Wybe language font-locks.")
+
+
+;; Wybe syntax table
+(defvar wybe-syntax-table nil "Syntax table for `wybe-mode'.")
+(setq wybe-syntax-table
+      (let ((synTable (make-syntax-table c-mode-syntax-table)))
+
+        (modify-syntax-entry ?# "< b" synTable)
+        (modify-syntax-entry ?\n "> b" synTable)
+
+        synTable))
+
 
 ;;;###autoload
 (define-derived-mode wybe-mode prog-mode
@@ -66,9 +78,10 @@
   "Major mode for editing wybe language"
 
   ;; code for syntax highlighting
-  (setq-local font-lock-defaults '((wybe-font-lock-keywords)))
+  (set-syntax-table wybe-syntax-table)
   (setq-local comment-start "#")
-  (setq-local comment-end ""))
+  (setq-local comment-end "")
+  (setq-local font-lock-defaults '((wybe-font-lock-keywords))))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.wybe\\'" . wybe-mode))
