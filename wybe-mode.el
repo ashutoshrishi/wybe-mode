@@ -17,6 +17,17 @@
   "Wybe Programming Language Major Mode."
   :group 'languages)
 
+
+;; Wybe key map
+(defvar wybe-mode-map
+  (let ((map (make-keymap)))
+    (define-key map "\C-j" 'newline-and-indent)
+    map)
+  "Keymap for Wybe major mode")
+
+
+
+
 ;; define several category of keywords
 (defconst wybe-keywords
   '("func" "if" "then" "else" "proc" "end" "public" "private" "use"
@@ -29,13 +40,15 @@
 (defconst wybe-types '("int" "float" "string" "char" "bool")
   "Wybe primitive types.")
 
+
+;; Define REGEXs
 ;; generate regex string for each category of keywords
 (defconst wybe-keywords-re (regexp-opt wybe-keywords 'words)
   "Regex for matching Wybe keywords.")
+
 (defconst wybe-types-re (regexp-opt wybe-types 'words)
   "Regex for matching Wybe primitive types.")
-;; (defconst wybe-flags-re '(regexp-opt wybe-flags 'words)
-;;   "Regex for matching function flags.")
+
 (defconst wybe-func-re
   (rx symbol-start (or "proc" "func" "type") (1+ space)
       (group (1+ (any alnum ?+ ?- ?*)))
@@ -72,6 +85,22 @@
         synTable))
 
 
+;; Indentation
+(defun wybe-indent-line ()
+  "Indent current line as Wybe code"
+  (interactive)
+  (let ((savep (> (current-column) (current-indentation)))
+        (indent (condition-case nil (max (wybe-calculate-indentation) 0)
+                  (error 0))))
+    (if savep
+        (save-excursion (indent-line-to indent))
+      (indent-line-to indent))))
+
+(defun wybe-calculate-indentation ()
+  "Return the column to which the current line should be indented."
+  (current-indentation))
+
+
 ;;;###autoload
 (define-derived-mode wybe-mode prog-mode
   "wybe mode"
@@ -81,7 +110,9 @@
   (set-syntax-table wybe-syntax-table)
   (setq-local comment-start "#")
   (setq-local comment-end "")
-  (setq-local font-lock-defaults '((wybe-font-lock-keywords))))
+  (setq-local font-lock-defaults '((wybe-font-lock-keywords)))
+  ;; (setq-local indent-line-function 'wybe-indent-line)
+  )
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.wybe\\'" . wybe-mode))
