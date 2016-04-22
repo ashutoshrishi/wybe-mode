@@ -26,16 +26,26 @@
   "Keymap for Wybe major mode")
 
 
+;; Wybe faces
+(defgroup wybe-faces nil
+  "Custom faces for syntax highlighting."
+  :group 'wybe)
+
+(defface wybe-font-lock-operator-face
+  '((((background light)) (:foreground "brown"))
+    (t (:foreground "khaki")))
+  "Face description for all operators."
+  :group 'wybe-faces)
+(defvar wybe-font-lock-operator-face
+  'wybe-font-lock-operator-face)
+
 
 
 ;; define several category of keywords
 (defconst wybe-keywords
   '("func" "if" "then" "else" "proc" "end" "public" "private" "use"
-    "type" "do" "until" "unless" "or")
+    "type" "do" "until" "unless" "or" "test")
   "Keywords of the language.")
-
-;; (defconst wybe-flags '("public" "private")
-;;   "Function flags.")
 
 (defconst wybe-types '("int" "float" "string" "char" "bool")
   "Wybe primitive types.")
@@ -55,20 +65,24 @@
       (any space ?\())
   "Regex for matching function and proc names.")
 
-(defconst wybe-comment-re
-  (rx (0+ anything) (group (char ?#) (0+ anything)) eol)
-  "Wybe comment regex.")
 
 (defconst wybe-custom-types-re
   (rx (char ?:) (0+ space)
       (group (1+ (any alnum))))
   "Regex for custom type annotations.")
 
+
+(defconst wybe-operators-re
+  "[][;,()|{}]\\|[-@^!:*=<>&/%+~?#]"
+  "Regex for matching Wybe in-built operators.")
+
+
 ;; create the list for font-lock.
 ;; each category of keyword is given a particular face
 (defvar wybe-font-lock-keywords
   `((,wybe-keywords-re . font-lock-keyword-face)
     (,wybe-types-re . font-lock-type-face)
+    (,wybe-operators-re . wybe-font-lock-operator-face)
     (,wybe-func-re . (1 font-lock-function-name-face))
     (,wybe-custom-types-re . (1 font-lock-type-face)))
   "Wybe language font-locks.")
