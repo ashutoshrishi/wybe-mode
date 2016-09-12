@@ -80,7 +80,7 @@ To disable this highlighting, set to nil."
   "The regular expression for matching function and proc names.")
 
 (defconst wybe--font-lock-func
-  (cons wybe--func-regexp font-lock-function-name-face)
+  (cons wybe--func-regexp '(1 font-lock-function-name-face))
   "Highlighting for function and procedure names.")
 
 ;; Operators
@@ -108,9 +108,9 @@ To disable this highlighting, set to nil."
 
 (defconst wybe--font-lock-highlighting
   (list (list wybe--font-lock-keywords
-              wybe--font-lock-prim-types
               wybe--font-lock-func
               wybe--font-lock-custom-types
+              wybe--font-lock-prim-types
               wybe--font-lock-operators)
         nil nil)
   "Combined highlighting for various syntactical features of Wybe.")
