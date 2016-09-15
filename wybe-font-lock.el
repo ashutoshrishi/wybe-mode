@@ -14,38 +14,33 @@
 (require 'rx)
 (require 'font-lock)
 
+;; Faces for font-locking
+
 (defgroup wybe-font-lock nil
   "Font locking for Wybe code."
   :group 'faces)
 
-(defface wybe-font-lock-operators
-  '((t :inherit font-lock-builtin-face))
+(defface wybe-font-lock-operators-face
+  '((t :inherit font-lock-operator-face))
   "The default face used to highlight operator functions/procs."
   :group 'wybe-font-lock)
+(defvar wybe-font-lock-operators-face
+  'wybe-font-lock-operators-face)
 
-(defcustom elm-font-lock-operators-face 'wybe-font-lock-operators
-  "The face used to highlight operators.
-To disable this highlighting, set to nil."
-  :type '(choice (const nil)
-                 face)
-  :group 'wybe-font-lock)
 
 ;; Font locking for various syntactical features of Wybe
 
 ;; Keywords
 
 (defconst wybe--keywords
-  '("func" "if" "then" "else" "proc" "end" "public" "private" "use"
-    "type" "do" "until" "unless" "or" "test" "import")
+  '("if" "then" "else" "proc" "end" "public" "private" "use"
+    "do" "until" "unless" "or" "test" "import" "while")
   "Keywords of the Wybe language.")
 
 (defconst wybe--keywords-regexp
   (concat (regexp-opt wybe--keywords 'words) "[^']")
   "The regular expression matching Wybe keywords.")
 
-(defconst wybe--font-lock-keywords
-  (cons wybe--keywords-regexp font-lock-keyword-face)
-  "Highlighting for keywords.")
 
 ;; Primitive Types and user defined types
 (defconst wybe--prim-types
@@ -62,36 +57,22 @@ To disable this highlighting, set to nil."
       (group (1+ (any alnum))))
   "Regex for custom type annotations.")
 
-(defconst wybe--font-lock-prim-types
-  (cons wybe--prim-types-regexp font-lock-type-face)
-  "Highlighting for primitive types.")
-
-(defconst wybe--font-lock-custom-types
-  (cons wybe--custom-types-regexp '(1 font-lock-type-face))
-  "Highlighting for custom Wybe types.")
-
+;; Constants
+(defconst wybe--constant-regexp
+  (rx symbol-start (1+ digit) symbol-end)
+  "Regex for Wybe constants.")
 
 ;; Functions and Procedure names
-
 (defconst wybe--func-regexp
-  (rx symbol-start (or "proc" "func" "type") (1+ space)
+  (rx (group symbol-start (or "proc" "func" "type") (1+ space))
       (group (1+ (any alnum ?+ ?- ?*)))
       (any space ?\())
   "The regular expression for matching function and proc names.")
 
-(defconst wybe--font-lock-func
-  (cons wybe--func-regexp '(1 font-lock-function-name-face))
-  "Highlighting for function and procedure names.")
-
 ;; Operators
-
 (defconst wybe--operators-regexp
-  "[][;,()|{}]\\|[-@^!:*=<>&/%+~?#]"
+  (rx (any ?+ ?- ?* ?< ?= ?> ?? ?/))
   "The regular expression for matching Wybe in-built operators.")
-
-(defconst wybe--font-lock-operators
-  (cons wybe--operators-regexp '(1 wybe-font-lock-operators-face))
-  "Highlighting for operator functions.")
 
 
 ;; Syntax Table
@@ -106,20 +87,25 @@ To disable this highlighting, set to nil."
 
 ;; Final Highlighting
 
-(defconst wybe--font-lock-highlighting
-  (list (list wybe--font-lock-keywords
-              wybe--font-lock-func
-              wybe--font-lock-custom-types
-              wybe--font-lock-prim-types
-              wybe--font-lock-operators)
-        nil nil)
+(defvar wybe-font-lock-keywords
+  `(("\\<\\(false\\|true\\)\\>" . font-lock-constant-face)
+    (,wybe--func-regexp (1 font-lock-keyword-face)
+                        (2 font-lock-function-name-face))
+    (,wybe--keywords-regexp . font-lock-keyword-face)
+    (,wybe--custom-types-regexp 1 font-lock-type-face)
+    (,wybe--prim-types-regexp font-lock-type-face)
+    ;; (,wybe--constant-regexp . font-lock-constant-face)
+    (wybe--operators-regexp . wybe-font-lock-operators-face))
   "Combined highlighting for various syntactical features of Wybe.")
+
 
 (defun turn-on-wybe-font-lock ()
   "Turn on Wybe-mode font lock."
-  (setq font-lock-multiline t)
   (set-syntax-table wybe--syntax-table)
-  (set (make-local-variable 'font-lock-defaults) wybe--font-lock-highlighting))
+  (setq-local font-lock-defaults '(wybe-font-lock-keywords
+                                   nil nil nil nil)))
+
+
 
 (provide 'wybe-font-lock)
 ;;; wybe-font-lock.el ends here
