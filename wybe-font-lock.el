@@ -21,9 +21,11 @@
   :group 'faces)
 
 (defface wybe-font-lock-operators-face
-  '((t :inherit font-lock-operator-face))
-  "The default face used to highlight operator functions/procs."
+  '((((background light)) (:foreground "brown"))
+    (t (:foreground "khaki")))
+  "The default face used to highlight operators."
   :group 'wybe-font-lock)
+
 (defvar wybe-font-lock-operators-face
   'wybe-font-lock-operators-face)
 
@@ -32,8 +34,12 @@
 
 ;; Keywords
 
+(defconst wybe--modifiers
+  '("public" "private")
+  "Special modifier keywords which act like syntactic labels.")
+
 (defconst wybe--keywords
-  '("if" "then" "else" "proc" "end" "public" "private" "use"
+  '("if" "then" "else" "proc" "end" "use"
     "do" "until" "unless" "or" "test" "import" "while")
   "Keywords of the Wybe language.")
 
@@ -41,6 +47,9 @@
   (concat (regexp-opt wybe--keywords 'words) "[^']")
   "The regular expression matching Wybe keywords.")
 
+(defconst wybe--modifiers-regexp
+  (regexp-opt wybe--modifiers 'words)
+  "The regular expression matching Wybe modifiers.")
 
 ;; Primitive Types and user defined types
 (defconst wybe--prim-types
@@ -59,7 +68,7 @@
 
 ;; Constants
 (defconst wybe--constant-regexp
-  (rx symbol-start (1+ digit) symbol-end)
+  (rx symbol-start (1+ digit) (opt ?.) (0+ digit) symbol-end)
   "Regex for Wybe constants.")
 
 ;; Functions and Procedure names
@@ -71,7 +80,7 @@
 
 ;; Operators
 (defconst wybe--operators-regexp
-  (rx (any ?+ ?- ?* ?< ?= ?> ?? ?/))
+  "[-@^!:*=<>&/%+~?#]"
   "The regular expression for matching Wybe in-built operators.")
 
 
@@ -89,13 +98,15 @@
 
 (defvar wybe-font-lock-keywords
   `(("\\<\\(false\\|true\\)\\>" . font-lock-constant-face)
+    (,wybe--modifiers-regexp . wybe-font-lock-operators-face)
     (,wybe--func-regexp (1 font-lock-keyword-face)
                         (2 font-lock-function-name-face))
     (,wybe--keywords-regexp . font-lock-keyword-face)
-    (,wybe--custom-types-regexp 1 font-lock-type-face)
-    (,wybe--prim-types-regexp font-lock-type-face)
-    ;; (,wybe--constant-regexp . font-lock-constant-face)
-    (wybe--operators-regexp . wybe-font-lock-operators-face))
+    (,wybe--prim-types-regexp . font-lock-type-face)
+    (,wybe--custom-types-regexp 1 font-lock-type-face keep)
+    (,wybe--operators-regexp . wybe-font-lock-operators-face)
+    (,wybe--constant-regexp . font-lock-constant-face)
+    )
   "Combined highlighting for various syntactical features of Wybe.")
 
 
